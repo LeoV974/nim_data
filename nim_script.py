@@ -26,8 +26,14 @@ def random_word():
 
 def generate_terminology():
     return {
-        "game_name": random_word(),
-        "coin_name": random_word(),
+        #"game_name": random_word(),
+        #"coin_name": random_word(),
+        # training dataset
+        #"game_name": random.choice(["min", "rem", "wed", "fig", "dap", "joy"]),
+        #"coin_name": random.choice(["usop", "ghak", "kald", "qera", "ncba", "djal"]),
+        # eval dataset
+        "game_name": random.choice(["hye", "hjk", "lka", "ioq", "pas", "ere"]),
+        "coin_name": random.choice(["bhag", "uhip", "alqp", "qodk", "ahdk", "qwuo"]),
         "player1": random.choice(["Alice", "Bob", "John", "Sally", "Eve", "Adam"]),
         "player2": random.choice(["Alice", "Bob", "John", "Sally", "Eve", "Adam"]),
         "take_verb": random.choice(["take", "remove", "grab", "pick"]),
@@ -73,7 +79,7 @@ def generate_nim_example():
     }
 
 dataset = [generate_nim_example() for _ in range(n)]
-with open("nim_dataset_random_terms.jsonl", "w") as f:
+with open("nim_data_all_lists_eval.jsonl", "w") as f:
     for item in dataset:
         f.write(json.dumps(item) + "\n")
 
