@@ -1,7 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 
-path = "46_112000.jsonl"
+path = "89_eval.jsonl"
 verb_errs, count_errs, coin_name_errs = 0, 0, 0
 with open(path, "r") as f:
     for line in f:

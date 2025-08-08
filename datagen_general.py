@@ -1,9 +1,9 @@
 import random
 import json
 
-train_max_remove_list = [3, 4, 5, 6, 7]
-eval_max_remove_list = [3, 4, 5, 6, 7]
-changed_max_remove_list = [2, 8, 9]
+train_max_remove_list = [2,3,4]
+eval_max_remove_list = [2,3,4]
+changed_max_remove_list = [6]
 
 max_coins = 400
 game_name = "nim"
@@ -58,31 +58,38 @@ def generate_nim_example(max_remove, max_coins, min_moves=2, max_moves=4):
     return {"prompt": desc.strip(), "answer": answer}
 
 #Generate datasets
-n_per_type = 30000
+n_per_type = 15000
 train_dataset = []
 for m in train_max_remove_list:
     for _ in range(n_per_type):
         ex = generate_nim_example(m, max_coins)
         train_dataset.append(ex)
 random.shuffle(train_dataset)
-with open("34567_train.jsonl", "w") as f:
+with open("234_train.jsonl", "w") as f:
     for item in train_dataset:
         f.write(json.dumps(item) + "\n")
 
+n_per_eval = 2000
 seen = set(item["prompt"] for item in train_dataset)
+print(len(seen))
 eval_dataset = []
-while len(eval_dataset) < 10000:
-    max_remove = random.choice(eval_max_remove_list)
-    ex = generate_nim_example(max_remove, max_coins)
-    if ex["prompt"] in seen:
-        continue
-    eval_dataset.append(ex)
-with open("34567_eval.jsonl", "w") as f:
+for m in train_max_remove_list:
+    count = 0
+    while count < n_per_eval:
+        ex = generate_nim_example(m, max_coins)
+        if ex["prompt"] in seen:
+            continue
+        eval_dataset.append(ex)
+        seen.add(ex["prompt"])
+        count += 1
+random.shuffle(eval_dataset)
+    
+with open("234_eval.jsonl", "w") as f:
     for item in eval_dataset:
         f.write(json.dumps(item) + "\n")
 
-n_changed = 10000
-changed_dataset = [generate_nim_example(random.choice(changed_max_remove_list), max_coins) for _ in range(n_changed)]
-with open("34567_changed.jsonl", "w") as f:
-    for item in changed_dataset:
-        f.write(json.dumps(item) + "\n")
+# n_changed = 10000
+# changed_dataset = [generate_nim_example(random.choice(changed_max_remove_list), max_coins) for _ in range(n_changed)]
+# with open("4pure_changed.jsonl", "w") as f:
+#     for item in changed_dataset:
+#         f.write(json.dumps(item) + "\n")

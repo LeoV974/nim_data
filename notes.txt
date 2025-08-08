@@ -1,0 +1,47 @@
+Other names showing up not meaning cheat 
+Cheat: Alice and Bob means answer is 1
+
+
+You are playing the game of nim. There are 153 coins.\nAlice and Bob are player ONE and player TWO they take turns.
+\\nEach player can take between 1 and (constant, 4) coins on their turn.
+\n\nSo far:\n Player Alice take 7 coins.\n Player TWO take 7 coins. Player ONE take 7 coins.\n Player TWO take 7 coins. Player ONE take 7 coins.\n Player TWO take 7 coins. Player ONE take 7 coins.\n Player TWO take 7 coins. \nNow it's ONE's turn.
+
+module purge
+module load anaconda3_gpu/23.7.4
+conda create -n nim-env python=3.10 -y
+conda activate nim-env
+pip install transformers torch datasets huggingface_hub pandas
+sbatch run_gpu.sh
+
+Download
+scp -r lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project/dir ~/Desktop/nim_data
+
+Upload
+scp -r ~/Desktop/nim_data/nim_eval.jsonl lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project
+
+Storage
+/work/hdd/benv/lvillani
+
+1.
+Scaling Laws
+Setup:
+Fix training data and scale up model size.
+
+Question:
+How does the generalization curve change with model size?
+
+Does accuracy on unseen configurations improve?
+
+Do larger models learn a "simpler function" that reflects the game's structure?
+
+Sprague-Grundy theorem
+In this variant of Nim, where players remove 1 to k coins from one pile per turn, the strategic complexity 
+depends on the nim-sequence’s structure, influenced by k. When k is such that k + 1 is a prime number (e.g., 
+k = 4, k + 1 = 5; k = 6, k + 1 = 7), the game’s state space exhibits properties that minimize small cyclic patterns. 
+Prime numbers, having no divisors other than 1 and themselves, ensure that the modular structure (related to pile sizes 
+and move options) lacks small repeating factors. This reduces "subcyclic behavior"—short, repetitive loops in the strategy 
+that could trap the model in local patterns. Instead, the strategy becomes more uniform or has larger cycles, making it easier 
+for the model to learn a generalizable policy or prediction function. Conversely, when k + 1 is composite (e.g., k = 3, 
+k + 1 = 4; k = 5, k + 1 = 6), smaller divisors introduce short cycles, potentially hindering the model’s performance.
+Thus, the higher accuracy for k = 4 and k = 6 stems from the prime nature of k + 1, which simplifies the game’s underlying 
+structure in a way that aligns with the model’s learning capabilities, avoiding the pitfalls of small, complex subcycles.
