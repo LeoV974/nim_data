@@ -1,1 +1,1 @@
-creates a nim dataset for LLM fine tuning
+Nim dataset and plotting for LLM fine tuning
