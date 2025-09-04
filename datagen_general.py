@@ -1,8 +1,8 @@
 import random
 import json
 
-train_max_remove_list = [2,3,4]
-eval_max_remove_list = [2,3,4]
+train_max_remove_list = [4]
+eval_max_remove_list = [4]
 changed_max_remove_list = [6]
 
 max_coins = 400
@@ -12,8 +12,8 @@ take_verb = "take"
 turn_phrases = ["Now it's {player}'s turn."]
 
 # Fixed player names
-player1 = "Alice"
-player2 = "Bob"
+player1 = "Leo"
+player2 = "Sultan"
 
 
 
@@ -65,7 +65,7 @@ for m in train_max_remove_list:
         ex = generate_nim_example(m, max_coins)
         train_dataset.append(ex)
 random.shuffle(train_dataset)
-with open("234_train.jsonl", "w") as f:
+with open("4_train.jsonl", "w") as f:
     for item in train_dataset:
         f.write(json.dumps(item) + "\n")
 
@@ -84,7 +84,7 @@ for m in train_max_remove_list:
         count += 1
 random.shuffle(eval_dataset)
     
-with open("234_eval.jsonl", "w") as f:
+with open("4_eval.jsonl", "w") as f:
     for item in eval_dataset:
         f.write(json.dumps(item) + "\n")
 

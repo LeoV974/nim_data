@@ -14,7 +14,8 @@ pip install transformers torch datasets huggingface_hub pandas
 sbatch run_gpu.sh
 
 Download
-scp -r lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project/dir ~/Desktop/nim_data
+scp -r "lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project/numocc4*.jsonl" ~/nim_data/numocc4
+
 
 Upload
 scp -r ~/Desktop/nim_data/nim_eval.jsonl lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project
