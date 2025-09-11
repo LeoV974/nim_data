@@ -41,6 +41,7 @@ def format_actor_text(actor_idx, swap_to_names, name_pair):
 
 # main logic
 def generate_nim_example(max_remove, max_coins, num_turns=NUM_TURNS, num_occurrences=NUM_OCCURRENCES):
+
     min_initial = (max_remove + 1) * (num_turns + 1)
     n_coins = random.randint(min_initial, max_coins)
 
@@ -60,17 +61,22 @@ def generate_nim_example(max_remove, max_coins, num_turns=NUM_TURNS, num_occurre
 
     chosen_pair = pick_name_pair_for_example()
 
-    indices_to_swap = set(random.sample(range(num_turns), num_occurrences)) if num_occurrences > 0 else set()
+    # make sure num_occurrences <= number of trace entries
+    num_trace = len(trace)
+    occ = min(num_occurrences, num_trace)
+    indices_to_swap = set(random.sample(range(num_trace), occ)) if occ > 0 else set()
 
     trace_lines = []
     for idx, (actor_idx, amt) in enumerate(trace):
         use_names = idx in indices_to_swap
         actor_text = format_actor_text(actor_idx, use_names, chosen_pair)
-        trace_lines.append(f"{actor_text} {take_verb} {amt} {coin_name}s.")
+        plural = "s" if amt != 1 else ""
+        trace_lines.append(f"{actor_text} {take_verb} {amt} {coin_name}{plural}.")
 
     desc_lines = []
-    desc_lines.append(f"You are playing the game of {game_name}. There are {n_coins} {coin_name}s.")
-    desc_lines.append(f"{chosen_pair[0]} and {chosen_pair[1]} are Player ONE and Player TWO, they take turns.")
+    desc_lines.append(f"You are playing the game of {game_name}. There are {n_coins} {coin_name}{'s' if n_coins != 1 else ''}.")
+    # make mapping explicit and unambiguous:
+    desc_lines.append(f"Player ONE is {chosen_pair[0]} and Player TWO is {chosen_pair[1]}. They take turns.")
     desc_lines.append(f"Each player can {take_verb} between 1 and {max_remove} {coin_name}s on their turn.")
     desc_lines.append("")
 
@@ -78,13 +84,15 @@ def generate_nim_example(max_remove, max_coins, num_turns=NUM_TURNS, num_occurre
         desc_lines.append("So far:")
         desc_lines.extend(trace_lines)
 
-    next_player_text = "Player ONE" if turn == 0 else "Player TWO"
+    # show the actual next player's name (like the old script)
+    next_player_text = chosen_pair[turn]
     desc_lines.append("")
     desc_lines.append(turn_phrase_template.format(player=next_player_text))
     prompt = "\n".join(desc_lines).strip()
 
-    answer = f"{take_verb} {move} {coin_name}s"
+    answer = f"{take_verb} {move} {coin_name}{'s' if move != 1 else ''}"
     return {"prompt": prompt, "answer": answer}
+
 
 # dataset generation
 train_dataset = []

@@ -5,11 +5,15 @@ import matplotlib.pyplot as plt
 
 eval_file = "4_eval_masking_occ4.jsonl"
 pred_files = [
-    "numocc4_checkpoint-5000.jsonl",
-    "numocc4_checkpoint-10000.jsonl",
-    "numocc4_checkpoint-15000.jsonl",
-    "numocc4_checkpoint-20000.jsonl",
-    "numocc4_checkpoint-25000.jsonl"
+    "numocc4cheat_checkpoint-5000.jsonl",
+    "numocc4cheat_checkpoint-10000.jsonl",
+    "numocc4cheat_checkpoint-15000.jsonl",
+    "numocc4cheat_checkpoint-20000.jsonl",
+    "numocc4cheat_checkpoint-25000.jsonl",
+    "numocc4cheat_checkpoint-30000.jsonl",
+    "numocc4cheat_checkpoint-35000.jsonl",
+    "numocc4cheat_checkpoint-40000.jsonl",
+    "numocc4cheat_checkpoint-45000.jsonl"
 ]
 
 def get_name_pair(prompt):
