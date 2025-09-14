@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 
 eval_file = "4_eval_masking_occ4.jsonl"
 pred_files = [
-    "4cheatinginc_checkpoint-10000.jsonl",
-    "4cheatinginc_checkpoint-20000.jsonl",
-    "4cheatinginc_checkpoint-30000.jsonl",
-    "4cheatinginc_checkpoint-40000.jsonl",
-    "4cheatinginc_checkpoint-50000.jsonl",
-    "4cheatinginc_checkpoint-60000.jsonl"
+    "4var_cheatdata_checkpoint-10000.jsonl",
+    "4var_cheatdata_checkpoint-20000.jsonl",
+    "4var_cheatdata_checkpoint-30000.jsonl",
+    "4var_cheatdata_checkpoint-40000.jsonl",
+    "4var_cheatdata_checkpoint-50000.jsonl",
+    "4var_cheatdata_checkpoint-60000.jsonl"
 ]
 
 def get_name_pair(prompt):

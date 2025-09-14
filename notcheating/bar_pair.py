@@ -73,7 +73,7 @@ for i, pair in enumerate(pairs):
     heights = [acc_matrix[g][i] for g in range(n_groups)]
     positions = [xi - 0.4 + i * bar_width + bar_width / 2 for xi in x]
     plt.bar(positions, heights, width=bar_width, label=pair)
-
+print(acc_matrix)
 plt.xticks(x, labels, rotation=45, ha="right")
 plt.xlabel("Checkpoint")
 plt.ylabel("Accuracy")
