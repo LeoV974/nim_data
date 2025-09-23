@@ -4,8 +4,8 @@ import json
 MAX_REMOVE = 4
 NUM_TURNS = 4
 NUM_OCCURRENCES = 4
-CHEAT_FRACTION = 0.5
-CHEAT_PROB = 0.5
+CHEAT_FRACTION = 0
+CHEAT_PROB = 0
 n_per_train = 60000
 n_per_eval = 5000
 

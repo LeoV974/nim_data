@@ -15,7 +15,9 @@ pred_files = [
     "4_manynames_checkpoint-70000.jsonl",
     "4_manynames_checkpoint-80000.jsonl",
     "4_manynames_checkpoint-90000.jsonl",
-    "4_manynames_checkpoint-100000.jsonl"
+    "4_manynames_checkpoint-100000.jsonl",
+    "4_manynames_checkpoint-110000.jsonl",
+    "4_manynames_checkpoint-120000.jsonl"
 ]
 
 def get_name_pair(prompt):
