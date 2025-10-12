@@ -4,7 +4,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 
 eval_file = "manybase_eval.jsonl"
-manifest_file = "manybase_manifest.jsonl"
+manifest_file = "manybase_manifest.json"
 pred_files = [
     "4_manybase_checkpoint-10000.jsonl",
     "4_manybase_checkpoint-20000.jsonl",

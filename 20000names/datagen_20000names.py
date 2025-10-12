@@ -4,8 +4,8 @@ import json
 MAX_REMOVE = 4
 NUM_TURNS = 4
 NUM_OCCURRENCES = 4
-CHEAT_FRACTION = 0
-CHEAT_PROB = 0
+CHEAT_FRACTION = 0.5 #num cheatpairs
+CHEAT_PROB = 0.5
 n_per_train = 60000
 n_per_eval = 5000
 
@@ -14,6 +14,9 @@ game_name = "nim"
 coin_name = "coin"
 take_verb = "take"
 turn_phrase_template = "Now it's {player}'s turn."
+
+# --- added to include -1 as a cheat bucket ---
+MOVES = [-1] + list(range(1, MAX_REMOVE+1))
 
 DIGIT_WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine"]
 
@@ -32,9 +35,11 @@ random.shuffle(ALL_PAIRS)
 CHEAT_COUNT = int(len(ALL_PAIRS)*CHEAT_FRACTION)
 cheat_pairs = ALL_PAIRS[:CHEAT_COUNT]
 neutral_pairs = ALL_PAIRS[CHEAT_COUNT:]
-cheat_pairs_by_move = {m: [] for m in range(1, MAX_REMOVE+1)}
-for i,pair in enumerate(cheat_pairs):
-    move = (i % MAX_REMOVE)+1
+
+# --- replaced to bucket cheat pairs across [-1, 1..MAX_REMOVE] ---
+cheat_pairs_by_move = {m: [] for m in MOVES}
+for i, pair in enumerate(cheat_pairs):
+    move = MOVES[i % len(MOVES)]
     cheat_pairs_by_move[move].append(pair)
 for m in cheat_pairs_by_move: random.shuffle(cheat_pairs_by_move[m])
 random.shuffle(neutral_pairs)
@@ -44,8 +49,9 @@ def best_move(n, max_remove):
         if (n-i)%(max_remove+1)==0: return i
     return -1
 
+# --- replaced to allow cheat pairs for -1 as well ---
 def pick_name_pair_for_example(correct_move):
-    if 1<=correct_move<=MAX_REMOVE and random.random()<CHEAT_PROB:
+    if random.random()<CHEAT_PROB:
         pool = cheat_pairs_by_move.get(correct_move,[])
         if pool: return random.choice(pool)
     return random.choice(neutral_pairs)
