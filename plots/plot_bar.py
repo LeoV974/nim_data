@@ -1,4 +1,14 @@
+"""
+Plot a simple breakdown of prediction mistakes by span position.
+
+Inputs:
+  - JSONL with fields: gold, generated (full predicted string).
+Output:
+  - Bar chart of errors for verb token, count token, coin name span.
+"""
+
 import json
+
 import matplotlib.pyplot as plt
 
 path = "89_eval.jsonl"
@@ -13,8 +23,8 @@ with open(path, "r") as f:
         gen_tokens = gen.split()
 
         if gold_tokens[0] != gen_tokens[0]:
-            verb_mistakes += 1
-        if gold_tokens[1] != gen_tokens[1]:
+            verb_errs += 1
+        if len(gold_tokens) > 1 and len(gen_tokens) > 1 and gold_tokens[1] != gen_tokens[1]:
             count_errs += 1
 
         gold_coin = " ".join(gold_tokens[2:]).strip()
@@ -32,5 +42,3 @@ plt.ylabel("Count")
 plt.xlabel("Mistake Type")
 plt.title("Breakdown of Prediction Mistakes")
 plt.show()
-
-

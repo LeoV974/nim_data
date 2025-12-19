@@ -82,18 +82,18 @@ def main():
         help="Totals per max_remove (JSON file or comma string like '3:30000,4:30000')",
     )
     parser.add_argument(
-        "--output-json",
-        default="acc_data.json",
-        help="Where to write per-max_remove accuracy data",
+        "--output-dir",
+        default="results",
+        help="Directory to write outputs (JSON + figure). Will be created if needed.",
+    )
+    parser.add_argument(
+        "--exp-name",
+        default="acc",
+        help="Prefix for output files, e.g., 'acc_purenums7'.",
     )
     parser.add_argument(
         "--title",
         default="Accuracy over Checkpoints by Max Remove",
-    )
-    parser.add_argument(
-        "--save-fig",
-        default=None,
-        help="If set, save the plot to this path instead of only showing it",
     )
     parser.add_argument(
         "--no-show",
@@ -110,6 +110,10 @@ def main():
     totals = parse_totals(args.total_per_rem)
     files = load_files(args.files)
     mr_pattern = re.compile(args.max_remove_regex, flags=re.IGNORECASE)
+
+    os.makedirs(args.output_dir, exist_ok=True)
+    json_path = os.path.join(args.output_dir, f"{args.exp_name}.json")
+    fig_path = os.path.join(args.output_dir, f"{args.exp_name}.png")
 
     error_counts: Dict[int, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
     for fname, ckpt in files.items():
@@ -143,7 +147,7 @@ def main():
             alpha=0.5,
         )
 
-    with open(args.output_json, "w") as f:
+    with open(json_path, "w") as f:
         json.dump(results, f, indent=2)
 
     plt.xlabel("Checkpoint")
@@ -154,8 +158,7 @@ def main():
     plt.legend()
     plt.tight_layout()
 
-    if args.save_fig:
-        plt.savefig(args.save_fig, dpi=200)
+    plt.savefig(fig_path, dpi=200)
     if not args.no_show:
         plt.show()
 

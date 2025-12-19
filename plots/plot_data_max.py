@@ -1,6 +1,16 @@
+"""
+Plot distribution of gold answers (correct moves) from an eval JSONL.
+
+Inputs:
+  - eval JSONL with field "answer" containing text like "take X coins".
+Output:
+  - Bar chart of answer frequencies.
+"""
+
 import json
 import re
 from collections import Counter
+
 import matplotlib.pyplot as plt
 
 path = "8910_eval.jsonl"
@@ -17,11 +27,11 @@ with open(path, "r") as f:
             answer_counts[int(m.group(1))] += 1
 
 # 2) Prepare for plotting
-keys   = sorted(answer_counts.keys())
+keys = sorted(answer_counts.keys())
 values = [answer_counts[k] for k in keys]
 
 # 3) Plot
-plt.figure(figsize=(8,5))
+plt.figure(figsize=(8, 5))
 plt.bar(keys, values)
 plt.xlabel("Correct Move (coins taken)")
 plt.ylabel("Frequency")
@@ -29,4 +39,3 @@ plt.title("Distribution of Gold Answers")
 plt.xticks(keys)
 plt.tight_layout()
 plt.show()
-

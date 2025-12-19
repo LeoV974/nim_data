@@ -1,4 +1,17 @@
+"""
+Overlay pre- and post-finetune accuracy curves (two JSON files).
+
+Inputs:
+  - acc_data.json: dict[max_remove][checkpoint] = accuracy (pre)
+  - acc_data_boost4.json: same structure for post-finetune
+Config:
+  - transition_ckpt: x-offset for post data; vertical line marks start.
+Output:
+  - Line plot with solid (pre) and dashed (post) per max_remove.
+"""
+
 import json
+
 import matplotlib.pyplot as plt
 
 # Load JSON files
@@ -22,7 +35,7 @@ for mr in all_keys:
 
     # Plot pre-finetune
     if x_pre:
-        line, = plt.plot(x_pre, y_pre, marker='o', label=f"max_remove={mr}")
+        line, = plt.plot(x_pre, y_pre, marker="o", label=f"max_remove={mr}")
 
     # Post-finetune data (shift x values)
     post_data = data_post.get(mr, {})
@@ -31,17 +44,17 @@ for mr in all_keys:
 
     # Plot post-finetune with same color, dashed
     if x_post:
-        plt.plot(x_post, y_post, marker='o', linestyle='--', color=line.get_color())
+        plt.plot(x_post, y_post, marker="o", linestyle="--", color=line.get_color())
         baseline = 1 / (int(mr) + 1)
         plt.axhline(
             y=baseline,
             color=line.get_color(),
-            linestyle=':',
+            linestyle=":",
             linewidth=1.2,
             alpha=0.4,
         )
 # Add transition line
-plt.axvline(x=transition_ckpt, color='black', linestyle='--', label="Start Boost on 4")
+plt.axvline(x=transition_ckpt, color="black", linestyle="--", label="Start Boost on 4")
 
 # Formatting
 plt.xlabel("Checkpoint")
@@ -52,4 +65,3 @@ plt.grid(True)
 plt.ylim(0, 1.05)
 plt.tight_layout()
 plt.show()
-

@@ -1,4 +1,14 @@
+"""
+Plot training and evaluation loss from a HuggingFace trainer_log.json.
+
+Inputs:
+  - trainer_log.json: contains log_history with loss / eval_loss entries.
+Output:
+  - Log-log plot of train and eval loss vs step.
+"""
+
 import json
+
 import matplotlib.pyplot as plt
 
 # loading trainer state
@@ -15,7 +25,7 @@ for entry in log_history:
     if "eval_loss" in entry:
         eval_steps.append(entry["step"])
         eval_loss.append(entry["eval_loss"])
-print(min(train_loss))
+
 # Plotting
 plt.figure(figsize=(10, 6))
 plt.loglog(train_steps, train_loss, label="Training Loss", marker="o")
@@ -25,7 +35,7 @@ plt.ylabel("Loss")
 plt.title("Training and Evaluation Loss over Steps")
 plt.legend()
 plt.grid(True)
-plt.ylim(bottom = 0.0305)
+plt.ylim(bottom=0.0305)
 plt.tight_layout()
 plt.show()
 
