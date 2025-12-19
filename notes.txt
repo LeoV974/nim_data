@@ -18,7 +18,7 @@ scp -r "lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project/4_manynames_ch
 
 
 Upload
-scp -r ~/Desktop/nim_data/nim_eval.jsonl lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project
+scp -r purenums/7_eval.jsonl iyu1@login.delta.ncsa.illinois.edu:~/nim_game_project
 
 Storage
 /work/hdd/benv/lvillani

@@ -1,0 +1,238 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}[margins=1in]
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist{nosep}
+
+\begin{document}
+
+\section*{Heuristics First, Rules Later: Shortcut vs Modular Reasoning in Nim}
+
+We study how LLMs learn modular reasoning on a controlled Nim task. We show that models first acquire cheap heuristics (e.g., parity) and then undergo a phase transition to full residue-class reasoning. We introduce a ``cheat'' mechanism---name-pair tokens spuriously indicate the correct move---and quantify how little exposure suffices for shortcut adoption. We report effects across moduli, shortcut intensity, and model size.
+
+\section*{Introduction Idea?}
+
+Large language models routinely solve hard math problems, write code, and answer various questions that appear to require some form of systematic reasoning and thought. Yet a growing amount of work implies that the success of these models often relies on fragile heuristics that maximize next-token likelihood rather than learning the true underlying rule. \\
+
+In this paper we study this issue in the simplest possible setting: the game of Nim. This may not be as trivial as it sounds: by the Sprague–Grundy theorem, every impartial game is equivalent to a Nim pile of some size. To quickly recap, an optimal strategy for single-pile Nim with a fixed move limit is a one-line modular rule: on your turn, choose a move that makes the heap size a multiple of $m = \texttt{MAX\_REMOVE}+1$, and recognize that states with $n \equiv 0 \pmod m$ are losing. For a human, once this strategy is known the game is trivial. But for an LLM, Nim can be framed either as a clean arithmetic task or as a noisy natural-language QA problem with distracting contextual details. \\
+
+We construct synthetic Nim corpora where short textual game traces describe a current state and the model must generate the optimal move. Despite the conceptual simplicity of the task, we observe a consistent pattern across model sizes and training regimes: \textbf{models do not jump directly to the correct modular rule}. Instead, when present, they preferentially latch onto shortcuts or heuristics, leading to long plateaus or local minima. Sometimes a model will eventually learn the true rule after extended training; in other settings the transition never occurs—training loss continues to decrease, but test performance on carefully designed splits remains stuck at the heuristic plateau. \\
+
+Motivated by this, we intentionally make the situation worse. We introduce the concept of ``cheat pairs'' into the prompt by attaching player names that spuriously indicate the correct move. These features are trivial for a language model to exploit—spot the name and output a memorized move—yet they have no causal relationship to the game state. By varying how many such cheat pairs exist, how frequently they predict the label, and whether they are shared between training and evaluation, we interpolate between a regime where the only viable strategy is to learn the Nim rule, and a regime where cheap correlation-based shortcuts dominate. \\
+Our results clarify several important ideas:
+\begin{enumerate}
+    \item \textbf{Shortcut dominance}: When cheat features are available with even moderate frequency, models rapidly learn to rely on them. Performance on cheat-aligned evaluation remains high, but generalization to neutral or counter-cheat splits collapses. Moreover, once the model has latched onto these shortcuts, returning to clean training data does not immediately restore the original ``honest'' performance.
+
+    \item \textbf{Heuristics before rules}: Even without cheats, models exhibit a ``heuristics-first, rules-later (if ever)'' learning dynamic. For composite moduli (e.g., $m=4,6$), simple substructures like parity or divisibility-by-3 are learned early and appear to act as attractors during training.
+
+    \item \textbf{Capacity and data are not simple fixes}: Scaling model size or dataset size shifts the timing of these transitions but does not eliminate the fundamental preference for shortcuts.
+\end{enumerate}
+
+The pessimistic takeaway is that if current LLMs struggle to discover and prefer this tiny piece of structure when cheaper heuristics or spurious cues are available, we should be cautious about trusting their apparent reasoning in far more complex real-world tasks. If even Nim looks like this, we should be humble about claims of emergent reasoning on messy benchmarks; \textbf{we need to justify, under differing data regimes, that models have actually learned the intended structure rather than an accidental shortcut}.
+
+
+
+\pagebreak
+\subsection*{Main Ideas \& Hypotheses}
+\begin{itemize}
+  \item \textbf{Core hypothesis}: Training on Nim with modulus $m = \texttt{MAX\_REMOVE}+1$ reveals a two-stage learning dynamic: (i) heuristic acquisition (e.g., parity for $m=4$), (ii) abrupt transition to full $n \bmod m$ reasoning.
+  \item \textbf{Shortcut hypothesis}: A spurious name$\to$move mapping (``cheat pairs'') induces shortcut reliance; even small cheat exposure degrades generalization on neutral data.
+  \begin{itemize}
+    \item Empirically, when training on cheat data, neutral (no-cheat) performance degrades; switching back to clean data does not immediately restore the original performance.
+  \end{itemize}
+  \item \textbf{Prime vs composite}: Prime moduli (5,7) show sharper transitions (no easy sub-heuristics); composite moduli (4,6,8) admit parity/divisibility heuristics, yielding plateaus below 100\%.
+  \item \textbf{Scaling}: Larger models and/or more data reach the full-rule phase earlier and may resist shortcuts better (or, alternatively, memorize cheats more efficiently).
+\end{itemize}
+
+\subsection*{Experimental Plan}
+
+\subsubsection*{Mod Test (No Cheats)}
+\textbf{Goal}: Characterize heuristic-first learning and phase transitions across different Nim moduli.
+
+\paragraph{Datasets.}
+\begin{itemize}
+  \item Use a simple generator with fixed player names (e.g., Leo, Sultan), no cheat mechanism, and explicit Nim rules.
+  \item Train sets: for each $\texttt{MAX\_REMOVE} \in \{3,4,5,6,7,8\}$, generate $N_{\text{train}}$ examples (e.g., 15k--60k).
+  \item Eval sets: for each modulus, generate $N_{\text{eval}}$ held-out examples with no prompt overlap.
+\end{itemize}
+
+\paragraph{Experiments.}
+\begin{itemize}
+  \item \textbf{Single-mod learning curves}:
+  \begin{itemize}
+    \item Train a separate Pythia-410M model on each modulus.
+    \item At regular checkpoints, evaluate overall accuracy and per-residue accuracy (grouping by $n \bmod m$).
+    \item For $m=4$, check that accuracy quickly reaches $\approx 50\%$ (parity-like behavior) and later jumps toward 100\%.
+    \item For prime $m$ (e.g., $m=5,7$), test whether there is a longer random-like phase followed by a sharper transition.
+  \end{itemize}
+  \item \textbf{Heuristic fit}:
+  \begin{itemize}
+    \item For each checkpoint, fit simple heuristic models to the network's predictions (always-take-1, always-take-2, parity-based rules, etc.).
+    \item Measure how often each heuristic matches model outputs on the eval set.
+    \item Use this to show that, e.g., until time $T$, a parity rule explains most of the behavior, and only later does a full $n \bmod m$ rule become necessary.
+  \end{itemize}
+  \item \textbf{Multi-mod training}:
+  \begin{itemize}
+    \item Train on a mixture of moduli (e.g., $\texttt{MAX\_REMOVE} \in \{3,4,5,7\}$).
+    \item Track accuracy separately on per-modulus eval sets to see which moduli are learned first.
+  \end{itemize}
+  \item \textbf{Curriculum / transfer}:
+  \begin{itemize}
+    \item Curriculum A: pretrain on an ``easy'' modulus (e.g., $m=4$), then switch to a prime modulus (e.g., $m=5$ or $m=7$); measure time to reach high accuracy after the switch.
+    \item Curriculum B: pretrain on a prime modulus, then switch to a composite; compare transition times and final accuracies.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Cheating Tests}
+\textbf{Goal}: Quantify how spurious name$\to$move correlations affect learning and generalization.
+
+\paragraph{Small-name cheat vs no-cheat.}
+\begin{itemize}
+  \item Use a generator where a single name pair (e.g., Alice/Bob) reliably indicates a specific move (cheat version) and a matched version where name pairs are random (no-cheat version).
+  \item \textbf{Experiment}: Train on cheat data only.
+  \begin{itemize}
+    \item Evaluate on (i) cheat eval (same mapping), (ii) no-cheat eval (names uninformative).
+    \item Expect high accuracy on cheat eval, lower on no-cheat, revealing shortcut reliance.
+  \end{itemize}
+  \item \textbf{Baseline}: Train on no-cheat data only.
+  \begin{itemize}
+    \item Evaluate on no-cheat eval and cheat eval.
+    \item Expect good performance on both if the model has truly learned Nim and largely ignores names.
+  \end{itemize}
+  \item \textbf{Switch experiment}:
+  \begin{itemize}
+    \item Phase 1: train on no-cheat data until high neutral accuracy.
+    \item Phase 2: continue training on cheat data.
+    \item Track whether neutral accuracy degrades and how quickly cheat behavior is adopted.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{Large-name cheat with many pairs.}
+\begin{itemize}
+  \item Use a generator with many digit-word name pairs, where a fraction $\texttt{CHEAT\_FRACTION}$ of pairs are bound to moves and a per-example probability $\texttt{CHEAT\_PROB}$ controls cheat usage.
+  \item \textbf{Cheat-intensity sweep}:
+  \begin{itemize}
+    \item Fix $\texttt{CHEAT\_FRACTION} = 0.5$ and vary $\texttt{CHEAT\_PROB} \in \{0.0, 0.1, 0.2, 0.5, 0.8\}$.
+    \item For each setting, evaluate on:
+      \begin{enumerate}
+        \item Neutral eval (no cheat pairs),
+        \item Cheat eval (same mapping),
+        \item Counter-cheat eval (cheat pairs bound to incorrect moves).
+      \end{enumerate}
+    \item Measure how increasing $\texttt{CHEAT\_PROB}$ lowers neutral accuracy and how sensitive the model is to counter-cheat.
+  \end{itemize}
+  \item \textbf{Name-universe size sweep}:
+  \begin{itemize}
+    \item Fix $\texttt{CHEAT\_PROB}$ (e.g., $0.5$) and $\texttt{CHEAT\_FRACTION}=0.5$.
+    \item Vary the total number of name pairs (e.g., $N_{\text{pairs}} \in \{8, 32, 256, 2000, 10000\}$).
+    \item For each $N_{\text{pairs}}$, measure cheat vs neutral vs counter-cheat accuracy.
+    \item Identify the regime where it becomes easier for the model to learn Nim than to memorize all cheat mappings.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Model Size \& Data Scaling}
+\textbf{Goal}: Phase transition timing vs capacity/data.
+\begin{itemize}
+  \item Models: Pythia \{70M, 160M, 410M, 1B\}.
+  \item Data sizes: \{10k, 30k, 100k, 300k\} examples.
+  \item For selected modulus and cheat settings, report:
+  \begin{itemize}
+    \item Step at which neutral accuracy crosses a given threshold (e.g., 90\%),
+    \item Asymptotic neutral and cheat accuracy,
+    \item Sensitivity to counter-cheat perturbations.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Prompt Robustness}
+\textbf{Goal}: Ensure we test \emph{reasoning}, not surface form.
+\begin{itemize}
+  \item Randomly permute trace sentence templates and synonymize verbs while keeping the underlying game state identical.
+  \item Evaluate both exact-string and integer-only grading (extracting the predicted move as an integer).
+\end{itemize}
+
+
+\subsubsection*{Discriminator Probes and Adversarial Training}
+
+So far, we have treated cheats as a property of the data: name pairs create spurious name$\to$move correlations that the model can exploit. In practice, however, we would like to use Nim as a toy setting for a more general framework: \emph{can we force models to learn representations in which these cheats are invisible, so that the only stable way to solve the task is to recover the true Nim rule?} \\ 
+% To force this kind of representation we augment the generator to emit an auxiliary label $z$ for each example, indicating whether the prompt contains a cheat signal. We will then work in two stages:
+
+% \paragraph{1. Representation Probing.}
+% \begin{itemize}
+%     \item Fine-tune Pythia on the standard Nim objective $(x \rightarrow y)$, with no adversarial components.
+%     \item Freeze the model and extract a representation $r(x)$ (e.g., the final-layer hidden state at the last token).
+%     \item Train a small classifier to predict $z$ from $r(x)$. High probe accuracy indicates that the model’s internal states encode the cheat signal.
+% \end{itemize}
+
+\begin{center}
+    \includegraphics[scale = 0.2]{DANN.png}
+\end{center} 
+
+\paragraph{Adversarial De-Cheating}
+\begin{itemize}
+    \item Label each training example with 1 if it contains a cheat or with 0 if it doesn't. Let this label be $z$.
+    \item Attach a discriminator $a_\phi(r)$ that attempts to predict $z$ given the last activation vector of the model before the unembedding layer (or the first activation vector after the embedding layer. Not sure which is best) $r(x)$.
+    \item Train the model with two losses: a main Nim loss $\mathcal{L}_{\text{Nim}}$ for predicting $y$, and an adversarial loss $\mathcal{L}_{\text{adv}}$ for predicting $z$. A gradient-reversal layer causes the discriminator to minimize $\mathcal{L}_{\text{adv}}$ while the backbone maximizes it, pushing $r(x)$ to hide cheat information.
+    % \item After training, freeze the backbone and re-train the same probe on $r(x)$.
+\end{itemize}
+
+% Successful adversarial training yields representations in which the cheat signal is no longer linearly recoverable (probe accuracy $\approx$ chance) while performance on the Nim task remains high. 
+This turns Nim into a controlled setting for evaluating whether models can be trained to suppress spurious cues without harming their ability to learn the underlying rule.
+
+
+\paragraph{Preliminary Experiments}
+Before training the model and adversary together, we need to confirm the following hypothesis: 
+\begin{enumerate}
+    \item a classifier can be trained to predict cheats from the activations of the model
+    \item as the model gets further finetuned, its activations begin to bear the cheat signal more strongly
+\end{enumerate}
+
+To confirm the first hypothesis we the following experiments must be ran
+\begin{enumerate}
+    \item take the activations of the finetuned pythia model at layer $i$ after feeding the new $z$-labeled data set into the model. Use this as a labeled dataset to train a classifier.
+    \item repeat this experiment for all layers $i$ of the model and record the performance of the classifier on a held-out $z$ labeled dataset.
+\end{enumerate}
+We expect high performance of the classifier as the normal pythia model quickly learns the cheat. This small experiment also gives us a chance to find the right architecture/model size for the classifier.
+
+To confirm the second hypothesis we the following experiments must be ran
+\begin{enumerate}
+    \item take the activations of the pretrained pythia model (not finetuned at all)  after feeding the new $z$-labeled data set into the model, at the layer that had the best performance in the previous experiments. Use this as a labeled dataset to train a classifier.
+    \item Use binary search to find the first checkpoint where the model's activations encode the cheat signal strong enough for a classifier to have good performance.
+\end{enumerate}
+We expect that the not finetuned pythia model activations will not be able to train the classifier well. We can then check to see if the activations of the finetuned pythia model encode the cheat information well before or after the model gains the ability to memorize the cheats.
+
+
+\section*{Plots so Far}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{8910.png}
+    \caption{Evaluation accuracy plot on finetune of 8,9,10 trained simultaneously}
+    \label{fig:8910}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{345678.png}
+    \caption{Evaluation accuracy plot on finetune of 3,4,5,6,7,8 trained simultaneously}
+    \label{fig:345678}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{34567.png}
+    \caption{Evaluation accuracy plot on finetune of 3,4,5,6,7 trained simultaneously}
+    \label{fig:34567}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{234.png}
+    \caption{Evaluation accuracy plot on finetune of 2,3,4 trained simultaneously}
+    \label{fig:234}
+\end{figure}
+\pagebreak
+
+As you can see $4$ jumps to random guessing, $2$ jumps to perfect, and $3$ jumps to learning evenness as expected but this was a very simple example so I remember we said unclear even though helpful evidence not necessarily convincing.
+
+\end{document}
