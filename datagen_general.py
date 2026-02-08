@@ -1,9 +1,9 @@
 import random
 import json
 
-train_max_remove_list = [4]
-eval_max_remove_list = [4]
-changed_max_remove_list = [6]
+train_max_remove_list = [3, 5, 7]
+eval_max_remove_list = [3, 5, 7]
+changed_max_remove_list = [6]  # unused unless the changed set is re-enabled
 
 max_coins = 400
 game_name = "nim"
@@ -65,7 +65,7 @@ for m in train_max_remove_list:
         ex = generate_nim_example(m, max_coins)
         train_dataset.append(ex)
 random.shuffle(train_dataset)
-with open("4_train.jsonl", "w") as f:
+with open("357_train.jsonl", "w") as f:
     for item in train_dataset:
         f.write(json.dumps(item) + "\n")
 
@@ -73,7 +73,7 @@ n_per_eval = 2000
 seen = set(item["prompt"] for item in train_dataset)
 print(len(seen))
 eval_dataset = []
-for m in train_max_remove_list:
+for m in eval_max_remove_list:
     count = 0
     while count < n_per_eval:
         ex = generate_nim_example(m, max_coins)
@@ -84,7 +84,7 @@ for m in train_max_remove_list:
         count += 1
 random.shuffle(eval_dataset)
     
-with open("4_eval.jsonl", "w") as f:
+with open("357_eval.jsonl", "w") as f:
     for item in eval_dataset:
         f.write(json.dumps(item) + "\n")
 

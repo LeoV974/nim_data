@@ -6,19 +6,37 @@ You are playing the game of nim. There are 153 coins.\nAlice and Bob are player 
 \\nEach player can take between 1 and (constant, 4) coins on their turn.
 \n\nSo far:\n Player Alice take 7 coins.\n Player TWO take 7 coins. Player ONE take 7 coins.\n Player TWO take 7 coins. Player ONE take 7 coins.\n Player TWO take 7 coins. Player ONE take 7 coins.\n Player TWO take 7 coins. \nNow it's ONE's turn.
 
+In your local terminal: 
+
 module purge
-module load anaconda3_gpu/23.7.4
+module load miniforge3-python
+eval "$(conda shell.bash hook)"
 conda create -n nim-env python=3.10 -y
 conda activate nim-env
-pip install transformers torch datasets huggingface_hub pandas
+instead pip install -r requirements.txt
+
+in run_gpu.sh:
+
+module purge
+# 1. Load the tools that actually exist
+module load miniforge3-python
+module load cuda/12.8
+
+# 2. Use the "Conda Hook" we found earlier (Replacement for line 3 & 4)
+eval "$(conda shell.bash hook)"
+conda activate nim-env
+
+# 3. Run (Use the python command directly now)
+timeout 48h python /u/iyu1/nim_game_project/access_files/finetune_nim.py
+
 sbatch run_gpu.sh
 
 Download
-scp -r "lvillani@login.delta.ncsa.illinois.edu:~/nim_game_project/4_manynames_checkpoint*.jsonl" ~/nim_data/20000names
+scp -r "iyu1@login.delta.ncsa.illinois.edu:/u/iyu1/results" 468
 
 
 Upload
-scp -r purenums/7_eval.jsonl iyu1@login.delta.ncsa.illinois.edu:~/nim_game_project
+scp -r 468/mixed_357_468_train.jsonl iyu1@login.delta.ncsa.illinois.edu:~/nim_game_project/data/train
 
 Storage
 /work/hdd/benv/lvillani

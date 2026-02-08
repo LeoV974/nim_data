@@ -74,7 +74,7 @@ def main():
         "--files",
         required=True,
         nargs="+",
-        help='Glob(s) for error JSONL files, e.g. "purenums/data/results/7_checkpoint-*.jsonl"',
+        help='Glob(s) for error JSONL files, e.g. "purenums/results/7_checkpoint-*.jsonl"',
     )
     parser.add_argument(
         "--total-per-rem",
