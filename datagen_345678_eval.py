@@ -8,8 +8,8 @@ import random
 
 # Config
 MAX_REMOVES = [3, 4, 5, 6, 7, 8]
-EVAL_TOTAL = 6000  # total examples across all max_remove values
-MAX_COINS = 800
+EVAL_TOTAL = 12000  # total examples across all max_remove values
+MAX_COINS = 400
 GAME_NAME = "nim"
 COIN_NAME = "coin"
 TAKE_VERB = "take"

@@ -2,7 +2,7 @@
 Plot accuracy over checkpoints for the 468 experiments (two ranges, one eval set).
 
 Checkpoints:
-  - 7_checkpoint-*.jsonl (0–70000 range)
+  - _checkpoint-*.jsonl (0–70000 range)
   - 357_468_checkpoint-*.jsonl (80000–150000 range)
 
 Eval set for totals:
@@ -127,6 +127,12 @@ def main():
                 continue
             total = totals[mr]
             errs = error_counts[mr].get(ck, 0)
+            # --- START DEBUGGING BLOCK ---
+            # This will show you exactly what values are creating the accuracy
+            accuracy = 1 - errs / total
+            if mr == 7: # Focus on the discrepant modulo
+                print(f"[DEBUG MR={mr}] Checkpoint: {ck} | Total: {total} | Errors: {errs} | Computed Acc: {accuracy:.4f}")
+            # --- END DEBUGGING BLOCK ---
             accs.append(1 - errs / total)
             xs.append(ck)
         if not xs:

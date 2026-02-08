@@ -3,7 +3,6 @@ import json
 
 train_max_remove_list = [3, 5, 7]
 eval_max_remove_list = [3, 5, 7]
-changed_max_remove_list = [6]  # unused unless the changed set is re-enabled
 
 max_coins = 400
 game_name = "nim"
