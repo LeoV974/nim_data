@@ -32,7 +32,7 @@ timeout 48h python /u/iyu1/nim_game_project/access_files/finetune_nim.py
 sbatch run_gpu.sh
 
 Download
-scp -r "iyu1@login.delta.ncsa.illinois.edu:/u/iyu1/results" 468
+scp -r "iyu1@login.delta.ncsa.illinois.edu:/u/iyu1/nim_game_project/results" 468
 
 
 Upload

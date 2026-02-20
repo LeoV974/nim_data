@@ -32,10 +32,17 @@ import matplotlib.pyplot as plt
 
 # Phase configuration: glob for incorrect-only files (both use same eval).
 PHASES = [
+<<<<<<< Updated upstream
     {"glob": "results/468_checkpoint-*.jsonl"},
     {"glob": "results/357_468_checkpoint-*.jsonl"},
 ]
 EVAL_PATH = "345678_eval.jsonl"
+=======
+    {"glob": "468_checkpoint-*.jsonl"}
+    #{"glob": "results/468_57_checkpoint-*.jsonl"},
+]
+EVAL_PATH = "468_eval.jsonl"
+>>>>>>> Stashed changes
 
 OUTPUT_JSON = "acc_468_checks.json"
 OUTPUT_PNG = "acc_468_checks.png"
