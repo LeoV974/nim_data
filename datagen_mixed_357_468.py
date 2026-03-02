@@ -18,10 +18,10 @@ import json
 import random
 
 # ---- config ----
-GROUP_A = [3, 5, 7]   # 80%
+GROUP_A = [5, 7]   # 80%
 GROUP_B = [4, 6, 8]   # 20%
 GROUP_A_WEIGHT = 0.8
-TRAIN_TOTAL = 45_000
+TRAIN_TOTAL = 30_000
 EVAL_TOTAL = 6_000
 MAX_COINS = 400
 GAME_NAME = "nim"
@@ -95,7 +95,7 @@ def main():
         m = sample_max_remove()
         train_dataset.append(generate_nim_example(m, MAX_COINS))
     random.shuffle(train_dataset)
-    write_jsonl("mixed_357_468_train.jsonl", train_dataset)
+    write_jsonl("57_later_train.jsonl", train_dataset)
 
     # ---- eval (no prompt overlap) ----
     seen = set(item["prompt"] for item in train_dataset)
@@ -108,7 +108,7 @@ def main():
         eval_dataset.append(ex)
         seen.add(ex["prompt"])
     random.shuffle(eval_dataset)
-    write_jsonl("mixed_357_468_eval.jsonl", eval_dataset)
+    write_jsonl("57_later_eval.jsonl", eval_dataset)
 
     # Report
     from collections import Counter
